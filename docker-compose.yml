@@ -1,0 +1,47 @@
+version: "3.7"
+services:
+  db:
+    env_file:
+      # Use Symfony local env to connect to init the desired DB.
+      # If not, move the desired values to the ./env file
+        ${APP_FULL_PATH}/.env.docker
+    build:
+      context: ./db
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mariadb/init.sql:/docker-entry-point-initdb.d/init.sql
+      - ./mariadb/data:/var/lib/mysql
+
+  php-fpm:
+    build:
+      context: ./php-fpm
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    depends_on:
+      - db
+    volumes:
+      - app:/var/www/project
+      - ./php-fpm/www.conf:/etc/php7/php-fpm.d/www.conf
+
+  nginx:
+    build:
+      context: ./nginx
+    volumes:
+      - app:/var/www/project
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites:/etc/nginx/sites-available
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./logs:/var/log/nginx
+    depends_on:
+      - php-fpm
+    ports:
+      - "80:80"
+volumes:
+  app:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${APP_FULL_PATH}

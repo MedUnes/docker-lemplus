@@ -1,0 +1,3 @@
+[submodule "noise-symfony"]
+	path = noise-symfony
+	url = git@github.com:MedUnes/noise-symfony.git
