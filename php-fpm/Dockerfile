@@ -40,10 +40,8 @@ RUN chown -R www-data:www-data /var/www
 RUN mkdir -p /var/www/.composer
 RUN chown -R www-data:www-data /var/www/.composer
 
-RUN composer create-project
-
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
 WORKDIR /var/www/project
-CMD php-fpm
+CMD composer update; php-fpm
 EXPOSE 9000
